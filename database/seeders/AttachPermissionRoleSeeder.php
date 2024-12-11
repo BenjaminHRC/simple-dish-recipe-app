@@ -14,6 +14,7 @@ class AttachPermissionRoleSeeder extends Seeder
      */
     public function run(): void
     {
+        // @TODO: a mettre dans les migrations
         $role = Role::findByName("ADMIN");
         $permissions = Permission::whereIn('name', ['create_dishes', 'delete_dishes'])->get();
 

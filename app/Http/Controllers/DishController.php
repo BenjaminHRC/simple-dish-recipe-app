@@ -19,7 +19,7 @@ class DishController extends Controller
     {
         $paginateDishes = Dish::orderBy('id', 'DESC')->paginate(10);
 
-        $this->addFavoriteAttribute($paginateDishes);
+        $this->addFavoriteAttribute($paginateDishes); //@TODO: eager loading (withExists)
 
         return view('welcome', compact('paginateDishes'));
     }
@@ -51,13 +51,15 @@ class DishController extends Controller
      */
     public function store(StoreDishRequest $request)
     {
-        $dish = new Dish($request->all());
+        $dish = new Dish($request->all()); //$request->validated()
 
         $dish->setAttribute('image', $request->file('image')->store('public/dishes'));
         $dish->save();
 
-        Mail::to(Auth::user())->send(new DishCreated($dish));
+        // @TODO: passer par une notification qui contient un mailable
+        Mail::to(Auth::user())->send(new DishCreated($dish)); // Pas le bon endroit --> Observer(bof) --> event / listeners
 
+        // Toujours des redirections nommées (par nom de route)
         return redirect()->to('/');
     }
 
@@ -82,7 +84,9 @@ class DishController extends Controller
      */
     public function update(UpdateDishRequest $request, Dish $dish)
     {
+        // Validated()
         $data = $request->all();
+        // eviter la manipulation d'array
         $data['image'] = $request->file('image')->store('public/dishes');
         $dish->save($data);
 
@@ -94,6 +98,7 @@ class DishController extends Controller
      */
     public function destroy(Dish $dish)
     {
+        // @TODO: observers
         $dish->users()->detach();
         $dish->delete();
 
@@ -105,6 +110,8 @@ class DishController extends Controller
      */
     public function addFavorite(Dish $dish)
     {
+        //@TODO: mettre dans un relation controller (voir méthode laravel orion)
+        //@TODO: toggle ?
         $this->isFavorite($dish)
             ? $dish->users()->detach(Auth::id())
             : $dish->users()->attach(Auth::id());
@@ -112,6 +119,7 @@ class DishController extends Controller
         return redirect()->back();
     }
 
+    //@TODO: a enlever
     private function addFavoriteAttribute($dishes): void
     {
         foreach ($dishes as $dish) {
@@ -119,10 +127,13 @@ class DishController extends Controller
         }
     }
 
+    //@TODO: a enlever
     private function isFavorite($dish): bool
     {
         $isFavorite = false;
 
+        //$dish->users()->contains(Auth::id())
+        //dish->users()->whereKey(Auth::id())->exists()
         if (in_array(Auth::id(), $dish->users()->pluck('id')->toArray())) {
             $isFavorite = true;
         }

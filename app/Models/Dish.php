@@ -15,8 +15,12 @@ class Dish extends Model
 
     protected $with = ['users'];
 
+    //@TODO: encryptable passer par mutators / accessors
     protected $encryptable = ['recette'];
 
+    //@TODO: pas la relation du owner du dish ?
+
+    // @TODO: relation pas claire
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class);

@@ -28,6 +28,7 @@ class DishCreated extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
+            //@TODO: dans la config ?
             from: new Address('benjamin.hoarau@compufirst.com', 'Benjamin HOARAU'),
             subject: 'Order Shipped',
         );

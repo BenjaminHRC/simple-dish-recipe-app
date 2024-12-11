@@ -11,6 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
+        //@TODO: renommer la table ?
+        // @TODO: table1_action_table2 exemple: user_likes_posts
         Schema::create('dish_user', function (Blueprint $table) {
             $table->foreignId('user_id')->constrained();
             $table->foreignId('dish_id')->constrained();
