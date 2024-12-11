@@ -20,20 +20,13 @@ class DishFactory extends Factory
      */
     public function definition(): array
     {
-        fake()->addProvider(new Restaurant(fake()))
-        //$fakerDishName = NativeFaker::create();
-        //$fakerDishName->addProvider(new Restaurant($fakerDishName));
-        $fakerDishImage = NativeFaker::create();
-        $fakerDishImage->addProvider(new LoremFlickrProvider($fakerDishImage));
-
         return [
-            'name' => $fakerDishName->foodName(),
+            'name' => fake()->addProvider(new Restaurant(fake())),
             'recette' => fake()->text(),
-            'image' => $fakerDishImage->imageUrl(640, 480, ['dish']),
-            'user_id' => User::factory(),
+            'image' => fake()->addProvider(new LoremFlickrProvider(fake())),
         ];
     }
 
-    //@TODO: tu ne créé un utilisateur que lorsque cela n'est pas spécifié dans la factory Dish::factory()->has(User::factory())->create() --> tu créé 2 utilisateurs
-    // @TODO: passer par des 'hooks' "afterMaking" et regarder si pas déjà précisé
+    // TODO: tu ne créé un utilisateur que lorsque cela n'est pas spécifié dans la factory Dish::factory()->has(User::factory())->create() --> tu créé 2 utilisateurs
+    // TODO: passer par des 'hooks' "afterMaking" et regarder si pas déjà précisé
 }
