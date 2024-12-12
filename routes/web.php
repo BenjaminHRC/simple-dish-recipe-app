@@ -12,7 +12,11 @@ Route::get('/dashboard', function () {
 Route::middleware('auth')->group(function () {
     Route::get('/', [DishController::class, 'index'])->name('home');
     Route::get('/favorites', [DishController::class, 'favorites'])->name('dish.favorites');
-    Route::get('/favorite/{dish}', [DishController::class, 'addFavorite'])->name('dish.add.favorite');
+    Route::post('/favorite/{dish}', [DishController::class, 'addFavorite'])->name('dish.add.favorite');
+    
+    Route::resource('dishes', DishController::class)
+        ->except(['index'])
+        ->middleware('can:manage,dish');
 });
 // @TODO pas de rôle mais passer par les policies
 // @TODO tu passe la gate en middleware ('can:view,dish')

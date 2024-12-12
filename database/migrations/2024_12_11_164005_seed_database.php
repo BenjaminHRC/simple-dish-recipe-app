@@ -4,6 +4,7 @@ use App\Models\Dish;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -15,25 +16,24 @@ return new class extends Migration
      */
     public function up(): void
     {
-        User::factory()
-            ->count(50)
-            ->create();
 
-        $user = User::create(['email' => 'test@example.com', 'password' => 'admin']);
+        User::factory()->count(50)->create();
+
+        $user = User::create([
+            'name' => 'benjamin',
+            'email' => 'test@example.com',
+            'password' => Hash::make('admin_secure_password')
+        ]);
 
         Dish::factory(250)
-            ->create()
-            ->each(function ($dish) {
-                $dish->users()
-                    ->attach(User::inRandomOrder()->limit(rand(1, 50))->pluck('id')->toArray());
-            });
+            ->recycle(User::all())
+            ->create();
 
-        $role = Role::create(['name' => 'ADMIN']);
-        $permissionCreateDish  = Permission::create(['name' => 'create_dishes']);
-        $permissionDeleteDish  = Permission::create(['name' => 'delete_dishes']);
+        $role = Role::firstOrCreate(['name' => 'ADMIN']);
+        $permissionCreateDish = Permission::firstOrCreate(['name' => 'create_dishes']);
+        $permissionDeleteDish = Permission::firstOrCreate(['name' => 'delete_dishes']);
 
-        $permissionCreateDish->assignRole($role);
-        $permissionDeleteDish->assignRole($role);
+        $role->syncPermissions([$permissionCreateDish, $permissionDeleteDish]);
 
         $user->assignRole('ADMIN');
     }

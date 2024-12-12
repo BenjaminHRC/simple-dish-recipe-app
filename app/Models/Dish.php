@@ -2,25 +2,34 @@
 
 namespace App\Models;
 
-use App\Traits\Encryptable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Crypt;
 
 class Dish extends Model
 {
-    use HasFactory, Encryptable;
+    use HasFactory;
 
-    protected $fillable = ["name", "recette", "user_id", "image", "users"];
+    protected $fillable = ["name", "recette", "user_id", "image"];
 
     protected $with = ['users'];
 
-    //@TODO: encryptable passer par mutators / accessors
-    protected $encryptable = ['recette'];
+    protected function recette(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => Crypt::decryptString($value),
+            set: fn ($value) => Crypt::encryptString($value)
+        );
+    }
 
-    //@TODO: pas la relation du owner du dish ?
+    public function owner(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 
-    // @TODO: relation pas claire
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class);
