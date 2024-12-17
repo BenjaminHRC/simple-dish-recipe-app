@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateDishRequest;
 use App\Mail\DishCreated;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
 class DishController extends Controller
@@ -17,9 +18,11 @@ class DishController extends Controller
      */
     public function index(): View
     {
-        $paginateDishes = Dish::withExists(['users as is_favorite' => function($query) {
-            $query->where('user_id', Auth::id());
-        }])->orderBy('id', 'DESC')->paginate(10);
+        $paginateDishes = Dish::withExists([
+            'users as is_favorite' => function ($query) {
+                $query->where('user_id', Auth::id());
+            }
+        ])->orderBy('id', 'DESC')->paginate(10);
 
         return view('welcome', compact('paginateDishes'));
     }
@@ -31,12 +34,9 @@ class DishController extends Controller
     {
         $paginateDishes = Dish::whereHas('users', function ($users) {
             $users->where('user_id', Auth::id());
-        })
-        ->withExists(['users as is_favorite' => function($query) {
+        })->withExists(['users as is_favorite' => function ($query) {
             $query->where('user_id', Auth::id());
-        }])
-        ->orderBy('id', 'DESC')
-        ->paginate(10);
+        }])->orderBy('id', 'DESC')->paginate(10);
 
         return view('welcome', compact('paginateDishes'));
     }
@@ -68,7 +68,7 @@ class DishController extends Controller
      */
     public function show(Dish $dish)
     {
-        return view('dishes.view', $dish);
+        return view('dishes.view', compact('dish'));
     }
 
     /**
@@ -96,8 +96,6 @@ class DishController extends Controller
      */
     public function destroy(Dish $dish)
     {
-        // @TODO: observers
-        $dish->users()->detach();
         $dish->delete();
 
         return redirect()->back();
@@ -109,7 +107,7 @@ class DishController extends Controller
     public function addFavorite(Dish $dish)
     {
         $dish->users()->toggle(Auth::id());
-        
+
         return redirect()->back();
     }
 }

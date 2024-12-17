@@ -9,10 +9,10 @@
         </p>
     </header>
 
-    <form method="post" action="{{ isset($dish) ? route('dish.update', ['dish' => $dish->id]) : route('dish.store') }}"
+    <form method="post" action="{{ isset($dish) ? route('dishes.update', ['dish' => $dish->id]) : route('dishes.store') }}"
         enctype="multipart/form-data" class="mt-6 space-y-6">
         @csrf
-        @method('POST')
+        @method(isset($dish) ? 'PUT' : 'POST')
 
         <x-text-input name="user_id" type="hidden" value="{{ Auth::id() }}" />
 
